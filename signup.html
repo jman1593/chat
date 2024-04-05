@@ -81,7 +81,7 @@
 const remoteDB = new PouchDB('http://strongdog.mooo.com/chat/_users', {
   skip_setup: true // Use this if you don't want to create a new DB if it doesn't exist
 });
-
+const forbiddenWords = ["nigger", "nigga", "fuck", "shit", "ass", "bitch", "fucker", "beiner", "cunt", "kkk", "nigg@", "penis", "cum"];
 function signUp() {
     var name = document.getElementById('name').value.trim().toLowerCase();
     var email = document.getElementById('email').value;
