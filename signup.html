@@ -75,51 +75,54 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/pouchdb/dist/pouchdb.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/pouchdb-authentication/dist/pouchdb.authentication.min.js"></script>
+    
     <script>
-// Initialize PouchDB
-const remoteDB = new PouchDB('http://strongdog.mooo.com/chat/_users', {
-  skip_setup: true // Use this if you don't want to create a new DB if it doesn't exist
-});
-const forbiddenWords = ["nigger", "nigga", "fuck", "shit", "ass", "bitch", "fucker", "beiner", "cunt", "kkk", "nigg@", "penis", "cum"];
-function signUp() {
-    var name = document.getElementById('name').value.trim().toLowerCase();
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-
-    // Check if the display name is forbidden
-    if (forbiddenWords.includes(name)) {
-        document.getElementById('error-message').textContent = 'This display name is not allowed. Please choose another.';
-        return; // Exit the function
-    }
-
-    // Create user in the CouchDB-compatible user system
-    remoteDB.signup(name, password, {
-        metadata: {
-            email: email,
-            displayName: name
+    // Initialize PouchDB
+    const remoteDB = new PouchDB('http://strongdog.mooo.com/chat', {
+      skip_setup: true // Skip DB creation if it doesn't exist
+    });
+    
+    const forbiddenWords = ["nigger", "nigga", "fuck", "shit", "ass", "bitch", "fucker", "beiner", "cunt", "kkk", "nigg@", "penis", "cum"];
+    
+    function signUp() {
+        var name = document.getElementById('name').value.trim().toLowerCase();
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+    
+        // Check if the display name is forbidden
+        if (forbiddenWords.includes(name)) {
+            document.getElementById('error-message').textContent = 'This display name is not allowed. Please choose another.';
+            return;
         }
-    }).then(function(response) {
-        console.log("User created successfully:", response);
-        // Redirect or further actions
-    }).catch(function(err) {
-        console.log(err);
-        if (err.name === 'conflict') {
-            document.getElementById('error-message').textContent = 'Display Name already taken. Please choose another.';
-        } else {
-            document.getElementById('error-message').textContent = 'Error creating user. Please try again.';
+    
+        // Create user in the CouchDB-compatible user system
+        remoteDB.signup(name, password, {
+            metadata: {
+                email: email,
+                displayName: name
+            }
+        }).then(function(response) {
+            console.log("User created successfully:", response);
+            // Redirect or further actions
+            // You might want to redirect to a login page or the main chat page
+        }).catch(function(err) {
+            console.log(err);
+            if (err.name === 'conflict') {
+                document.getElementById('error-message').textContent = 'Username already exists. Please choose another.';
+            } else {
+                document.getElementById('error-message').textContent = 'Error creating user. Please try again.';
+            }
+        });
+    }
+    
+    document.getElementById('sign-up-button').addEventListener('click', signUp);
+    document.getElementById('signup-form').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            signUp();
         }
     });
-}
-
-document.getElementById('sign-up-button').addEventListener('click', signUp);
-document.getElementById('signup-form').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        signUp();
-    }
-});
-
-</script>
+    </script>
 </body>
 </html>
