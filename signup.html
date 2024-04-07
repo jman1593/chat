@@ -78,51 +78,41 @@
     <script src="https://cdn.jsdelivr.net/npm/pouchdb-authentication/dist/pouchdb.authentication.min.js"></script>
     
     <script>
-    // Initialize PouchDB
-    const remoteDB = new PouchDB('https://strongdog.mooo.com/chat', {
-      skip_setup: true // Skip DB creation if it doesn't exist
-    });
-    
-    const forbiddenWords = ["nigger", "nigga", "fuck", "shit", "ass", "bitch", "fucker", "beiner", "cunt", "kkk", "nigg@", "penis", "cum"];
-    
-    function signUp() {
-        var name = document.getElementById('name').value.trim().toLowerCase();
-        var email = document.getElementById('email').value;
-        var password = document.getElementById('password').value;
-    
-        // Check if the display name is forbidden
-        if (forbiddenWords.includes(name)) {
-            document.getElementById('error-message').textContent = 'This display name is not allowed. Please choose another.';
-            return;
-        }
-    
-        // Create user in the CouchDB-compatible user system
-        remoteDB.signup(name, password, {
-            metadata: {
-                email: email,
-                displayName: name
-            }
-        }).then(function(response) {
-            console.log("User created successfully:", response);
-            // Redirect or further actions
-            // You might want to redirect to a login page or the main chat page
-        }).catch(function(err) {
-            console.log(err);
-            if (err.name === 'conflict') {
-                document.getElementById('error-message').textContent = 'Username already exists. Please choose another.';
-            } else {
-                document.getElementById('error-message').textContent = 'Error creating user. Please try again.';
-            }
-        });
+// PouchDB setup
+const db = new PouchDB('https://strongdog.mooo.com/chat');
+
+// Forbidden words list
+const forbiddenWords = ["nigger", "nigga", "fuck", "shit", "ass", "bitch", "fucker", "beiner", "cunt", "kkk", "nigg@", "penis", "cum"];
+
+// Sign up function
+function signUp() {
+    var name = document.getElementById('name').value.trim().toLowerCase();
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+
+    if (forbiddenWords.includes(name)) {
+        document.getElementById('error-message').textContent = 'This display name is not allowed. Please choose another.';
+        return;
     }
-    
-    document.getElementById('sign-up-button').addEventListener('click', signUp);
-    document.getElementById('signup-form').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            signUp();
-        }
+
+    var userDoc = {
+        _id: 'users/' + email,  // Unique ID
+        username: name,
+        email: email,
+        password: password  // Ideally, hash the password
+    };
+
+    db.put(userDoc).then(function (response) {
+        console.log("User created successfully:", response);
+        // Redirect or further action
+    }).catch(function (err) {
+        console.error("Error creating user:", err);
+        document.getElementById('error-message').textContent = 'Error creating user. Please try again.';
     });
+}
+
+document.getElementById('sign-up-button').addEventListener('click', signUp);
+
     </script>
 </body>
 </html>
